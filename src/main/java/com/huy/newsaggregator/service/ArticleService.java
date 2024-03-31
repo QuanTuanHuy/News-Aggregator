@@ -6,9 +6,11 @@ import com.huy.newsaggregator.model.Tag;
 import com.huy.newsaggregator.repository.ArticleRepository;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.huy.newsaggregator.repository.TagRepository;
 import org.springframework.data.domain.PageRequest;
@@ -94,5 +96,29 @@ public class ArticleService {
         }
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
         return articleRepository.findArticleByHashtagsId(temp.get().getId(), pageable);
+    }
+
+    public List<Long> findSuggestArticles(Long sourceArticleId) throws Exception {
+        Optional<Article> sourceArticle = articleRepository.findById(sourceArticleId);
+        if (sourceArticle.isEmpty()) {
+            throw new Exception("article does not exist ...");
+        }
+        Article source = sourceArticle.get();
+        List<Long> articleTagsIds = source.getHashtags().stream().map(Tag::getId).toList();
+
+        Set<Long> similarArticlesIds = articleRepository.findArticleIdByTagId(articleTagsIds);
+
+        similarArticlesIds.remove(source.getId());
+
+        return similarArticlesIds.stream().toList();
+    }
+
+    public Article findArticleById(Long id) throws Exception {
+        Optional<Article> article = articleRepository.findById(id);
+        if (article.isEmpty()) {
+            throw new Exception("Article does not exist ...");
+        } else {
+            return article.get();
+        }
     }
 }

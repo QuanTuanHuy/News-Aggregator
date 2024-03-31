@@ -32,13 +32,19 @@ public class ArticleController {
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Article> getArticleById(@PathVariable Long id) throws Exception {
+        Article article = articleService.findArticleById(id);
+        return new ResponseEntity<>(article, HttpStatus.OK);
+    }
+
     @GetMapping("/key")
     public ResponseEntity<List<Article>> getArticleByKeyWord(
-            @RequestParam String keyWord,
-            @RequestParam Integer pageNumber,
-            @RequestParam Integer pageSize,
-            @RequestParam String sortBy,
-            @RequestParam(defaultValue = "DESC") String direction) {
+            @RequestParam(value = "key") String keyWord,
+            @RequestParam(value = "page", defaultValue = "0") Integer pageNumber,
+            @RequestParam(value = "size", defaultValue = "15") Integer pageSize,
+            @RequestParam(value = "sort", defaultValue = "creationDate") String sortBy,
+            @RequestParam(value = "direct", defaultValue = "DESC") String direction) {
         List<Article> articles = articleService.getArticleByKeyWord(
                 keyWord, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
@@ -47,10 +53,10 @@ public class ArticleController {
     @GetMapping("/tag")
     public ResponseEntity<List<Article>> getArticleByTag(
             @RequestParam String tag,
-            @RequestParam Integer pageNumber,
-            @RequestParam Integer pageSize,
-            @RequestParam String sortBy,
-            @RequestParam(defaultValue = "DESC") String direction) throws Exception {
+            @RequestParam(value = "page", defaultValue = "0") Integer pageNumber,
+            @RequestParam(value = "size", defaultValue = "15") Integer pageSize,
+            @RequestParam(value = "sort", defaultValue = "creationDate") String sortBy,
+            @RequestParam(value = "direct", defaultValue = "DESC") String direction) throws Exception {
         List<Article> articles = articleService.getArticleByTag(
                 tag, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
@@ -59,10 +65,10 @@ public class ArticleController {
     @GetMapping("/resource")
     public ResponseEntity<List<Article>> getArticleByResource(
             @RequestParam String source,
-            @RequestParam Integer pageNumber,
-            @RequestParam Integer pageSize,
-            @RequestParam String sortBy,
-            @RequestParam(defaultValue = "DESC") String direction) {
+            @RequestParam(value = "page", defaultValue = "0") Integer pageNumber,
+            @RequestParam(value = "size", defaultValue = "15") Integer pageSize,
+            @RequestParam(value = "sort", defaultValue = "creationDate") String sortBy,
+            @RequestParam(value = "direct", defaultValue = "DESC") String direction) {
         List<Article> articles = articleService.getArticleByResource(
                 source, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
@@ -72,9 +78,9 @@ public class ArticleController {
     public ResponseEntity<List<Article>> getArticleDate(
             @RequestParam LocalDate start,
             @RequestParam LocalDate end,
-            @RequestParam Integer pageNumber,
-            @RequestParam Integer pageSize,
-            @RequestParam(defaultValue = "DESC") String direction) {
+            @RequestParam(value = "page", defaultValue = "0") Integer pageNumber,
+            @RequestParam(value = "size", defaultValue = "15") Integer pageSize,
+            @RequestParam(value = "direct", defaultValue = "DESC") String direction) {
         List<Article> articles = articleService.getArticleByDate(
                 start, end, pageNumber, pageSize, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
@@ -83,13 +89,19 @@ public class ArticleController {
     @GetMapping("/type")
     public ResponseEntity<List<Article>> getArticleType(
             @RequestParam String type,
-            @RequestParam Integer pageNumber,
-            @RequestParam Integer pageSize,
-            @RequestParam String sortBy,
-            @RequestParam(defaultValue = "DESC") String direction) {
+            @RequestParam(value = "page", defaultValue = "0") Integer pageNumber,
+            @RequestParam(value = "size", defaultValue = "15") Integer pageSize,
+            @RequestParam(value = "sort", defaultValue = "creationDate") String sortBy,
+            @RequestParam(value = "direct", defaultValue = "DESC") String direction) {
         List<Article> articles = articleService.getArticleByType(
                 type, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/similar")
+    public ResponseEntity<List<Long>> suggestArticles(@PathVariable Long id) throws Exception {
+        List<Long> similarArticleIds = articleService.findSuggestArticles(id);
+        return new ResponseEntity<>(similarArticleIds, HttpStatus.OK);
     }
 
 }
