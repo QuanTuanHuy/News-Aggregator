@@ -22,7 +22,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
 
     List<Article> findByCreationDateBetween(LocalDate startDate, LocalDate endDate, Pageable pageable);
 
-
-//    @Query("SELECT a from Article a WHERE a.hashtags CONTAINS :tag")
-//    List<Article> findByTag(@Param("tag") String tag, Pageable pageable);
+    List<Article> findArticleByHashtagsId(Long tagId, Pageable pageable);
 }

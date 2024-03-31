@@ -20,6 +20,12 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
+    @PostMapping()
+    public ResponseEntity<Article> createArticle(@RequestBody CreateArticleRequest createArticleRequest) {
+        Article createdArticle = articleService.createArticle(createArticleRequest);
+        return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
+    }
+
     @GetMapping()
     public ResponseEntity<List<Article>> getAllArticle() {
         List<Article> articles = articleService.getAllArticle();
@@ -38,11 +44,16 @@ public class ArticleController {
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 
-
-    @PostMapping()
-    public ResponseEntity<Article> createArticle(@RequestBody CreateArticleRequest createArticleRequest) {
-        Article createdArticle = articleService.createArticle(createArticleRequest);
-        return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
+    @GetMapping("/tag")
+    public ResponseEntity<List<Article>> getArticleByTag(
+            @RequestParam String tag,
+            @RequestParam Integer pageNumber,
+            @RequestParam Integer pageSize,
+            @RequestParam String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction) throws Exception {
+        List<Article> articles = articleService.getArticleByTag(
+                tag, pageNumber, pageSize, sortBy, direction);
+        return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 
     @GetMapping("/resource")

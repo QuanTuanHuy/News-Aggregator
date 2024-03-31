@@ -2,11 +2,15 @@ package com.huy.newsaggregator.service;
 
 import com.huy.newsaggregator.dto.CreateArticleRequest;
 import com.huy.newsaggregator.model.Article;
+import com.huy.newsaggregator.model.Tag;
 import com.huy.newsaggregator.repository.ArticleRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import com.huy.newsaggregator.repository.TagRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,8 +20,14 @@ import org.springframework.stereotype.Service;
 public class ArticleService {
     private final ArticleRepository articleRepository;
 
-    public ArticleService(ArticleRepository articleRepository) {
+    private final TagService tagService;
+
+    private final TagRepository tagRepository;
+
+    public ArticleService(ArticleRepository articleRepository, TagService tagService, TagRepository tagRepository) {
         this.articleRepository = articleRepository;
+        this.tagService = tagService;
+        this.tagRepository = tagRepository;
     }
 
     public Article createArticle(CreateArticleRequest req) {
@@ -28,9 +38,11 @@ public class ArticleService {
         article.setArticleType(req.getArticleType());
         article.setDetailedArticleContent(req.getDetailedArticleContent());
         article.setCreationDate(req.getCreationDate());
-        article.setHashtags(req.getHashtags());
         article.setWebsiteResource(req.getWebsiteResource());
         article.setAuthorName(req.getAuthorName());
+
+        Set<Tag> createTags = tagService.createTags(req.getHashtags());
+        article.setHashtags(createTags);
 
         return articleRepository.save(article);
     }
@@ -74,7 +86,13 @@ public class ArticleService {
         return (Pageable) PageRequest.of(pageNumber, pageSize, sort);
     }
 
-//    public List<Article> getArticleByTag(String tag, Pageable pageable) {
-//        return articleRepository.findByTag(tag, pageable);
-//    }
+    public List<Article> getArticleByTag(String tag, int pageNumber, int pageSize, String sortBy,
+                                         String direction) throws Exception {
+        Optional<Tag> temp = tagRepository.findByName(tag);
+        if (temp.isEmpty()) {
+            throw new Exception("Tag does not exist ...");
+        }
+        Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
+        return articleRepository.findArticleByHashtagsId(temp.get().getId(), pageable);
+    }
 }
