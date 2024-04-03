@@ -59,4 +59,12 @@ public class TagService {
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
     }
+
+    public Tag findTagById(Long id) throws Exception {
+        Optional<Tag> tag = tagRepository.findById(id);
+        if (tag.isEmpty()) {
+            throw new Exception("tag id does not exist ...");
+        }
+        return tag.get();
+    }
 }

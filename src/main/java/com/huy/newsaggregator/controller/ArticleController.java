@@ -6,6 +6,7 @@ import com.huy.newsaggregator.model.Tag;
 import com.huy.newsaggregator.service.ArticleService;
 import com.huy.newsaggregator.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -86,8 +87,8 @@ public class ArticleController {
 
     @GetMapping("/date")
     public ResponseEntity<List<Article>> getArticleDate(
-            @RequestParam LocalDate start,
-            @RequestParam LocalDate end,
+            @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate start,
+            @RequestParam  @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate end,
             @RequestParam(value = "page", defaultValue = "0") Integer pageNumber,
             @RequestParam(value = "size", defaultValue = "15") Integer pageSize,
             @RequestParam(value = "direct", defaultValue = "DESC") String direction) {
