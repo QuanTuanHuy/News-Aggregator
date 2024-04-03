@@ -6,10 +6,7 @@ import com.huy.newsaggregator.model.Tag;
 import com.huy.newsaggregator.repository.ArticleRepository;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.huy.newsaggregator.repository.TagRepository;
@@ -47,6 +44,14 @@ public class ArticleService {
         article.setHashtags(createTags);
 
         return articleRepository.save(article);
+    }
+
+    public List<Article> createListArticle(List<CreateArticleRequest> reqs) {
+        List<Article> articles = new ArrayList<>();
+        for (var req : reqs) {
+            articles.add(createArticle(req));
+        }
+        return articles;
     }
 
     public List<Article> getAllArticle() {
@@ -98,19 +103,23 @@ public class ArticleService {
         return articleRepository.findArticleByHashtagsId(temp.get().getId(), pageable);
     }
 
-    public List<Long> findSuggestArticles(Long sourceArticleId) throws Exception {
+    public List<Article> findSuggestArticles(Long sourceArticleId) throws Exception {
         Optional<Article> sourceArticle = articleRepository.findById(sourceArticleId);
         if (sourceArticle.isEmpty()) {
             throw new Exception("article does not exist ...");
         }
         Article source = sourceArticle.get();
-        List<Long> articleTagsIds = source.getHashtags().stream().map(Tag::getId).toList();
+        List<Long> sourceTagIds = source.getHashtags().stream().map(Tag::getId).toList();
 
-        Set<Long> similarArticlesIds = articleRepository.findArticleIdByTagId(articleTagsIds);
+        List<Long> similarArticlesIds = articleRepository.findSimilarArticleIdByTagId(sourceTagIds);
 
         similarArticlesIds.remove(source.getId());
 
-        return similarArticlesIds.stream().toList();
+        List<Article> similarArticles = new ArrayList<>();
+        for (Long id : similarArticlesIds) {
+            similarArticles.add(articleRepository.findById(id).get());
+        }
+        return similarArticles;
     }
 
     public Article findArticleById(Long id) throws Exception {
@@ -120,5 +129,9 @@ public class ArticleService {
         } else {
             return article.get();
         }
+    }
+
+    public void deleteAll() {
+        articleRepository.deleteAll();
     }
 }

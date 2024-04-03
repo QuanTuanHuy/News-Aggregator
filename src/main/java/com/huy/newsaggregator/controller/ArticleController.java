@@ -2,7 +2,10 @@ package com.huy.newsaggregator.controller;
 
 import com.huy.newsaggregator.dto.CreateArticleRequest;
 import com.huy.newsaggregator.model.Article;
+import com.huy.newsaggregator.model.Tag;
 import com.huy.newsaggregator.service.ArticleService;
+import com.huy.newsaggregator.service.TagService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +23,17 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
-    @PostMapping()
+    @PostMapping("/create")
     public ResponseEntity<Article> createArticle(@RequestBody CreateArticleRequest createArticleRequest) {
         Article createdArticle = articleService.createArticle(createArticleRequest);
         return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
+    }
+
+    @PostMapping("create/list")
+    public ResponseEntity<List<Article>> createArticle(
+            @RequestBody List<CreateArticleRequest> createArticleRequests) {
+        List<Article> articles = articleService.createListArticle(createArticleRequests);
+        return new ResponseEntity<>(articles, HttpStatus.CREATED);
     }
 
     @GetMapping()
@@ -99,9 +109,14 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}/similar")
-    public ResponseEntity<List<Long>> suggestArticles(@PathVariable Long id) throws Exception {
-        List<Long> similarArticleIds = articleService.findSuggestArticles(id);
+    public ResponseEntity<List<Article>> suggestArticles(@PathVariable Long id) throws Exception {
+        List<Article> similarArticleIds = articleService.findSuggestArticles(id);
         return new ResponseEntity<>(similarArticleIds, HttpStatus.OK);
     }
 
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAllArticles() {
+        articleService.deleteAll();
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
 }

@@ -5,9 +5,8 @@ import com.huy.newsaggregator.repository.ArticleRepository;
 import com.huy.newsaggregator.repository.TagRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class TagService {
@@ -37,5 +36,27 @@ public class TagService {
             tags.add(getOrCreateTag(tag));
         }
         return tags;
+    }
+
+//    public List<Tag> getTrendingTags() {
+//        List<Long> tagIds = tagRepository.findTrendingTagIds();
+//        List<Tag> tags = new ArrayList<>();
+//        for (Long id : tagIds) {
+//            tags.add(tagRepository.findById(id).get());
+//        }
+//        return tags;
+//    }
+
+    public List<Tag> getTrendingTagsByDate(LocalDate start, LocalDate end) {
+        List<Long> tagIds = tagRepository.findTrendingTagIdsByDate(start, end);
+        List<Tag> tags = new ArrayList<>();
+        for (Long id : tagIds) {
+            tags.add(tagRepository.findById(id).get());
+        }
+        return tags;
+    }
+
+    public List<Tag> getAllTags() {
+        return tagRepository.findAll();
     }
 }

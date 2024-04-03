@@ -26,22 +26,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
 
     List<Article> findArticleByHashtagsId(Long tagId, Pageable pageable);
 
-//    @Query("SELECT a.id FROM Article a JOIN a.hashtags t WHERE t.id = :tagId")
-//    Set<Long> findArticleIdByTagId(@Param("tagId") Long tagId);
-
-    @Query("SELECT a.id FROM Article a JOIN a.hashtags t WHERE t.id IN :tagIds")
-    Set<Long> findArticleIdByTagId(@Param("tagIds") List<Long> tagIds);
-
-//    @Query("SELECT COUNT(DISTINCT t) " +
-//            "FROM Post p1 JOIN p1.tags t " +
-//            "WHERE p1.id = :postId1 " +
-//            "AND EXISTS " +
-//            "(SELECT 1 FROM Post p2 JOIN p2.tags t2 WHERE p2.id = :postId2 AND t2 = t)")
-//    int countSimilarTags(@Param("id1") Long articleId1, @Param("id2") Long articleId2);
-
-//    @Query("SELECT COUNT(DISTINCT t) FROM Article a2 JOIN a2.hashtags t " +
-//            "WHERE a2.id = :id2 " +
-//            "AND t.id IN " +
-//            "(SELECT a.hashtags FROM Article a WHERE a.id = :id1")
-//    int countSimilarTags(@Param("id1") Long articleId1, @Param("id2") Long articleId2);
+    @Query("SELECT a.id FROM Article a JOIN a.hashtags t WHERE t.id IN :tagIds " +
+            "GROUP BY a.id order by COUNT(a.id) DESC LIMIT 5")
+    List<Long> findSimilarArticleIdByTagId(@Param("tagIds") List<Long> tagIds);
 }
