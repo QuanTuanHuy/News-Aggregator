@@ -7,7 +7,6 @@ import com.huy.newsaggregator.repository.ArticleRepository;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.huy.newsaggregator.repository.TagRepository;
 import org.springframework.data.domain.PageRequest;
@@ -90,7 +89,7 @@ public class ArticleService {
         } else {
             sort = Sort.by(Sort.Direction.ASC, sortBy);
         }
-        return (Pageable) PageRequest.of(pageNumber, pageSize, sort);
+        return PageRequest.of(pageNumber, pageSize, sort);
     }
 
     public List<Article> getArticleByTag(String tag, int pageNumber, int pageSize, String sortBy,

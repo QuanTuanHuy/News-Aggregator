@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 public interface ArticleRepository extends JpaRepository<Article, Long>{
     List<Article> findByWebsiteResourceContainingIgnoreCase(String websiteResource, Pageable pageable);

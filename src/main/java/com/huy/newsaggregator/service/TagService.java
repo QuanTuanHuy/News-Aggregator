@@ -1,7 +1,6 @@
 package com.huy.newsaggregator.service;
 
 import com.huy.newsaggregator.model.Tag;
-import com.huy.newsaggregator.repository.ArticleRepository;
 import com.huy.newsaggregator.repository.TagRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +11,9 @@ import java.util.*;
 public class TagService {
 
     private final TagRepository tagRepository;
-    private final ArticleRepository articleRepository;
 
-    public TagService(TagRepository tagRepository, ArticleRepository articleRepository) {
+    public TagService(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
-        this.articleRepository = articleRepository;
     }
 
     public Tag createTag(String tag) {
