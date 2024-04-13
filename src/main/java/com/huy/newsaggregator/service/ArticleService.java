@@ -2,11 +2,13 @@ package com.huy.newsaggregator.service;
 
 import com.huy.newsaggregator.dto.CreateArticleRequest;
 import com.huy.newsaggregator.model.Article;
+import com.huy.newsaggregator.model.Resource;
 import com.huy.newsaggregator.model.Tag;
 import com.huy.newsaggregator.repository.ArticleRepository;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.huy.newsaggregator.repository.TagRepository;
 import org.springframework.data.domain.PageRequest;
@@ -22,13 +24,16 @@ public class ArticleService {
 
     private final TagRepository tagRepository;
 
-    public ArticleService(ArticleRepository articleRepository, TagService tagService, TagRepository tagRepository) {
+    private final ResourceService resourceService;
+
+    public ArticleService(ArticleRepository articleRepository, TagService tagService, TagRepository tagRepository, ResourceService resourceService) {
         this.articleRepository = articleRepository;
         this.tagService = tagService;
         this.tagRepository = tagRepository;
+        this.resourceService = resourceService;
     }
 
-    public Article createArticle(CreateArticleRequest req) {
+    public Article createArticle(CreateArticleRequest req) throws Exception {
         Article article = new Article();
         article.setArticleLink(req.getArticleLink());
         article.setArticleTitle(req.getArticleTitle());
@@ -36,8 +41,10 @@ public class ArticleService {
         article.setArticleType(req.getArticleType());
         article.setDetailedArticleContent(req.getDetailedArticleContent());
         article.setCreationDate(req.getCreationDate());
-        article.setWebsiteResource(req.getWebsiteResource());
         article.setAuthorName(req.getAuthorName());
+
+        Resource resource = resourceService.getResourceByName(req.getWebsiteResource());
+        article.setResource(resource);
 
         Set<Tag> createTags = tagService.createTags(req.getHashtags());
         article.setHashtags(createTags);
@@ -45,7 +52,7 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    public List<Article> createListArticle(List<CreateArticleRequest> reqs) {
+    public List<Article> createListArticle(List<CreateArticleRequest> reqs) throws Exception {
         List<Article> articles = new ArrayList<>();
         for (var req : reqs) {
             articles.add(createArticle(req));
@@ -58,9 +65,10 @@ public class ArticleService {
     }
 
     public List<Article> getArticleByResource(
-        String resource, int pageNumber, int pageSize, String sortBy, String direction) {
+        String resource, int pageNumber, int pageSize, String sortBy, String direction) throws Exception {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
-        return articleRepository.findByWebsiteResourceContainingIgnoreCase(resource, pageable);
+        Resource resource1 = resourceService.getResourceByName(resource);
+        return articleRepository.findArticleByResourceId(resource1.getId(), pageable);
     }
 
     public List<Article> getArticleByKeyWord(
@@ -72,7 +80,7 @@ public class ArticleService {
     public List<Article> getArticleByType(
             String type, int pageNumber, int pageSize, String sortBy, String direction) {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
-        return articleRepository.findByArticleTypeContainingIgnoreCase(type, pageable);
+        return articleRepository.findByArticleType(type, pageable);
     }
 
     public List<Article> getArticleByDate(
@@ -94,12 +102,9 @@ public class ArticleService {
 
     public List<Article> getArticleByTag(String tag, int pageNumber, int pageSize, String sortBy,
                                          String direction) throws Exception {
-        Optional<Tag> temp = tagRepository.findByName(tag);
-        if (temp.isEmpty()) {
-            throw new Exception("Tag does not exist ...");
-        }
+        Tag temp = tagService.getTagByName(tag);
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
-        return articleRepository.findArticleByHashtagsId(temp.get().getId(), pageable);
+        return articleRepository.findArticleByHashtagsId(temp.getId(), pageable);
     }
 
     public List<Article> findSuggestArticles(Long sourceArticleId) throws Exception {
@@ -121,7 +126,7 @@ public class ArticleService {
         return similarArticles;
     }
 
-    public Article findArticleById(Long id) throws Exception {
+    public Article getArticleById(Long id) throws Exception {
         Optional<Article> article = articleRepository.findById(id);
         if (article.isEmpty()) {
             throw new Exception("Article does not exist ...");
@@ -132,5 +137,77 @@ public class ArticleService {
 
     public void deleteAll() {
         articleRepository.deleteAll();
+    }
+
+    public List<Article> findArticleBySearchForm(
+            String resource,
+            String type,
+            String keyWord,
+            LocalDate startDate, LocalDate endDate,
+            String tagName) throws Exception {
+        List<Long> articlesId = articleRepository.findAllArticleId();
+        List<Long> searchId = new ArrayList<>();
+        List<Article> searchArticle = new ArrayList<>();
+        List<HashSet<Long>> search = new ArrayList<>();
+        HashSet<Long> temp;
+
+        if (!resource.isEmpty()) {
+            Resource resource1 = resourceService.getResourceByName(resource);
+            temp = articleRepository.findArticleByResourceId(resource1.getId());
+            if (temp.isEmpty()) {
+                throw new Exception("No found article with resource is" + resource);
+            }
+            search.add(temp);
+        }
+
+        if (!type.isEmpty()) {
+            temp = articleRepository.findByArticleType(type);
+            if (temp.isEmpty()) {
+                throw new Exception("No found article with type is " + type);
+            }
+            search.add(temp);
+        }
+
+        if (!keyWord.isEmpty()) {
+            temp = articleRepository.findByKeyWord(keyWord);
+            if (temp.isEmpty()) {
+                throw new Exception("No found article contain keyword " + keyWord);
+            }
+            search.add(temp);
+        }
+
+        if (startDate != null && endDate != null) {
+            temp = articleRepository.findByCreationDateBetween(startDate, endDate);
+            if (temp.isEmpty()) {
+                throw new Exception("No found article between " + startDate + " and " + endDate);
+            }
+            search.add(temp);
+        }
+
+        if (!tagName.isEmpty()) {
+            Tag tag = tagService.getTagByName(tagName);
+            temp = articleRepository.findArticleByHashtagsId(tag.getId());
+            if (temp.isEmpty()) {
+                throw new Exception("No found article contain tag is " + tagName);
+            }
+            search.add(temp);
+        }
+
+        for (Long id : articlesId) {
+            boolean flag = true;
+            for (var searchSet : search) {
+                if (!searchSet.contains(id)) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) searchId.add(id);
+        }
+
+        for (Long id : searchId) {
+            searchArticle.add(getArticleById(id));
+        }
+
+        return searchArticle;
     }
 }

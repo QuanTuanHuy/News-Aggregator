@@ -7,13 +7,17 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "article")
+@Table(name = "articles")
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "resource_id")
+    private Resource resource;
+
     private String articleLink;
-    private String websiteResource;
     private String articleType;
     @Column(length = 2000)
     private String articleSummary;
@@ -29,31 +33,22 @@ public class Article {
     private Set<Tag> hashtags;
     private String authorName;
 
+    public void addTag(Tag tag) {
+        this.hashtags.add(tag);
+    }
+
+    public void removeTag(Long tagId) {
+        Tag tag = this.hashtags.stream().filter(
+                x -> Objects.equals(x.getId(), tagId)).findFirst().orElse(null);
+        if (tag != null) {
+            this.hashtags.remove(tag);
+            tag.getArticles().remove(this);
+        }
+    }
+
     public Article() {}
 
-//    public Article(Long id,
-//                   String articleLink,
-//                   String websiteResource,
-//                   String articleType,
-//                   String articleSummary,
-//                   String articleTitle,
-//                   String detailedArticleContent,
-//                   LocalDate creationDate,
-//                   Set<String> hashtags,
-//                   String authorName) {
-//        this.id = id;
-//        this.articleLink = articleLink;
-//        this.websiteResource = websiteResource;
-//        this.articleType = articleType;
-//        this.articleSummary = articleSummary;
-//        this.articleTitle = articleTitle;
-//        this.detailedArticleContent = detailedArticleContent;
-//        this.creationDate = creationDate;
-//        this.hashtags = hashtags;
-//        this.authorName = authorName;
-//    }
     public Article(String articleLink,
-                   String websiteResource,
                    String articleType,
                    String articleSummary,
                    String articleTitle,
@@ -61,7 +56,6 @@ public class Article {
                    LocalDate creationDate,
                    String authorName) {
         this.articleLink = articleLink;
-        this.websiteResource = websiteResource;
         this.articleType = articleType;
         this.articleSummary = articleSummary;
         this.articleTitle = articleTitle;
@@ -76,22 +70,6 @@ public class Article {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getArticleLink() {
-        return articleLink;
-    }
-
-    public void setArticleLink(String articleLink) {
-        this.articleLink = articleLink;
-    }
-
-    public String getWebsiteResource() {
-        return websiteResource;
-    }
-
-    public void setWebsiteResource(String websiteResource) {
-        this.websiteResource = websiteResource;
     }
 
     public String getArticleType() {
@@ -150,16 +128,19 @@ public class Article {
         this.authorName = authorName;
     }
 
-    public void addTag(Tag tag) {
-        this.hashtags.add(tag);
+    public Resource getResource() {
+        return resource;
     }
 
-    public void removeTag(Long tagId) {
-        Tag tag = this.hashtags.stream().filter(
-                x -> Objects.equals(x.getId(), tagId)).findFirst().orElse(null);
-        if (tag != null) {
-            this.hashtags.remove(tag);
-            tag.getArticles().remove(this);
-        }
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
+    public String getArticleLink() {
+        return articleLink;
+    }
+
+    public void setArticleLink(String articleLink) {
+        this.articleLink = articleLink;
     }
 }

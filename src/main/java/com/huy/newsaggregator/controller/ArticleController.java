@@ -25,14 +25,15 @@ public class ArticleController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Article> createArticle(@RequestBody CreateArticleRequest createArticleRequest) {
+    public ResponseEntity<Article> createArticle(
+            @RequestBody CreateArticleRequest createArticleRequest) throws Exception {
         Article createdArticle = articleService.createArticle(createArticleRequest);
         return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
     }
 
     @PostMapping("create/list")
     public ResponseEntity<List<Article>> createArticle(
-            @RequestBody List<CreateArticleRequest> createArticleRequests) {
+            @RequestBody List<CreateArticleRequest> createArticleRequests) throws Exception {
         List<Article> articles = articleService.createListArticle(createArticleRequests);
         return new ResponseEntity<>(articles, HttpStatus.CREATED);
     }
@@ -43,9 +44,23 @@ public class ArticleController {
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Article>> searchArticle(
+            @RequestParam(required = false, defaultValue = "") String resource,
+            @RequestParam(required = false, defaultValue = "") String type,
+            @RequestParam(required = false, defaultValue = "") String key,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate endDate,
+            @RequestParam(required = false, defaultValue = "") String tag
+    ) throws Exception {
+        List<Article> articles = articleService.findArticleBySearchForm(
+                resource, type, key, startDate, endDate, tag);
+        return new ResponseEntity<>(articles, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Article> getArticleById(@PathVariable Long id) throws Exception {
-        Article article = articleService.findArticleById(id);
+        Article article = articleService.getArticleById(id);
         return new ResponseEntity<>(article, HttpStatus.OK);
     }
 
@@ -79,7 +94,7 @@ public class ArticleController {
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "size", required = false, defaultValue = "15") Integer pageSize,
             @RequestParam(name = "sort", required = false, defaultValue = "creationDate") String sortBy,
-            @RequestParam(name = "direct", required = false, defaultValue = "DESC") String direction) {
+            @RequestParam(name = "direct", required = false, defaultValue = "DESC") String direction) throws Exception {
         List<Article> articles = articleService.getArticleByResource(
                 source, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);

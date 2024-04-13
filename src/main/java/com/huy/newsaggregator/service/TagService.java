@@ -35,15 +35,6 @@ public class TagService {
         return tags;
     }
 
-//    public List<Tag> getTrendingTags() {
-//        List<Long> tagIds = tagRepository.findTrendingTagIds();
-//        List<Tag> tags = new ArrayList<>();
-//        for (Long id : tagIds) {
-//            tags.add(tagRepository.findById(id).get());
-//        }
-//        return tags;
-//    }
-
     public List<Tag> getTrendingTagsByDate(LocalDate start, LocalDate end) {
         List<Long> tagIds = tagRepository.findTrendingTagIdsByDate(start, end);
         List<Tag> tags = new ArrayList<>();
@@ -63,5 +54,13 @@ public class TagService {
             throw new Exception("tag id does not exist ...");
         }
         return tag.get();
+    }
+
+    public Tag getTagByName(String name) throws Exception {
+        Optional<Tag> temp = tagRepository.findByName(name);
+        if (temp.isEmpty()) {
+            throw new Exception("Tag does not exist ...");
+        }
+        return temp.get();
     }
 }
