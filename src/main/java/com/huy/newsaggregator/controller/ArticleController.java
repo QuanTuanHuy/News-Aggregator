@@ -51,10 +51,15 @@ public class ArticleController {
             @RequestParam(required = false, defaultValue = "") String key,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate endDate,
-            @RequestParam(required = false, defaultValue = "") String tag
+            @RequestParam(required = false, defaultValue = "") String tag,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "15") Integer size,
+            @RequestParam(required = false, defaultValue = "creationDate") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String direction
+
     ) throws Exception {
         List<Article> articles = articleService.findArticleBySearchForm(
-                resource, type, key, startDate, endDate, tag);
+                resource, type, key, startDate, endDate, tag, sortBy, page, size, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 

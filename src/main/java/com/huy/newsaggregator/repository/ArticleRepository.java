@@ -30,13 +30,13 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
     List<Article> findArticleByResourceId(Long resourceId, Pageable pageable);
 
     @Query("SELECT a.id FROM Article a JOIN a.hashtags t WHERE t.id IN :tagIds " +
-            "GROUP BY a.id order by COUNT(a.id) DESC LIMIT 5")
+            "GROUP BY a.id order by COUNT(a.id) DESC LIMIT 6")
     List<Long> findSimilarArticleIdByTagId(@Param("tagIds") List<Long> tagIds);
 
 
     // handle form search
 
-    @Query("SELECT a.id FROM Article a")
+    @Query("SELECT a.id FROM Article a ORDER BY a.id")
     List<Long> findAllArticleId();
     @Query("SELECT a.id FROM Article a JOIN a.resource r WHERE r.id = :resourceId")
     HashSet<Long> findArticleByResourceId(@Param("resourceId") Long resourceId);
@@ -55,4 +55,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
 
     @Query("SELECT a.id FROM Article a JOIN a.hashtags t WHERE t.id = :tagId")
     HashSet<Long> findArticleByHashtagsId(@Param("tagId") Long tagId);
+
+    @Query("SELECT a FROM Article a WHERE a.id IN :searchId ORDER BY a.id")
+    List<Article> findAllByIdsIn(@Param("searchId") List<Long> searchId, Pageable pageable);
 }

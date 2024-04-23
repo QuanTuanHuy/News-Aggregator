@@ -65,20 +65,20 @@ public class ArticleService {
     }
 
     public List<Article> getArticleByResource(
-        String resource, int pageNumber, int pageSize, String sortBy, String direction) throws Exception {
+        String resource, Integer pageNumber, Integer pageSize, String sortBy, String direction) throws Exception {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
         Resource resource1 = resourceService.getResourceByName(resource);
         return articleRepository.findArticleByResourceId(resource1.getId(), pageable);
     }
 
     public List<Article> getArticleByKeyWord(
-            String keyWord, int pageNumber, int pageSize, String sortBy, String direction) {
+            String keyWord, Integer pageNumber, Integer pageSize, String sortBy, String direction) {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
         return articleRepository.findByKeyWord(keyWord, pageable);
     }
 
     public List<Article> getArticleByType(
-            String type, int pageNumber, int pageSize, String sortBy, String direction) {
+            String type, Integer pageNumber, Integer pageSize, String sortBy, String direction) {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
         return articleRepository.findByArticleType(type, pageable);
     }
@@ -90,7 +90,7 @@ public class ArticleService {
         return articleRepository.findByCreationDateBetween(startDate, endDate, pageable);
     }
 
-    private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String direction) {
+    private Pageable createPageable(Integer pageNumber, Integer pageSize, String sortBy, String direction) {
         Sort sort;
         if (direction.equalsIgnoreCase("DESC")) {
             sort = Sort.by(Sort.Direction.DESC, sortBy);
@@ -100,7 +100,7 @@ public class ArticleService {
         return PageRequest.of(pageNumber, pageSize, sort);
     }
 
-    public List<Article> getArticleByTag(String tag, int pageNumber, int pageSize, String sortBy,
+    public List<Article> getArticleByTag(String tag, Integer pageNumber, Integer pageSize, String sortBy,
                                          String direction) throws Exception {
         Tag temp = tagService.getTagByName(tag);
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
@@ -143,8 +143,13 @@ public class ArticleService {
             String resource,
             String type,
             String keyWord,
-            LocalDate startDate, LocalDate endDate,
-            String tagName) throws Exception {
+            LocalDate startDate,
+            LocalDate endDate,
+            String tagName,
+            String sortBy,
+            Integer pageNumber,
+            Integer pageSize,
+            String direction) throws Exception {
         List<Long> articlesId = articleRepository.findAllArticleId();
         List<Long> searchId = new ArrayList<>();
         List<Article> searchArticle = new ArrayList<>();
@@ -204,10 +209,8 @@ public class ArticleService {
             if (flag) searchId.add(id);
         }
 
-        for (Long id : searchId) {
-            searchArticle.add(getArticleById(id));
-        }
+        Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
 
-        return searchArticle;
+        return articleRepository.findAllByIdsIn(searchId, pageable);
     }
 }
