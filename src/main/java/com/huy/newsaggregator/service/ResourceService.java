@@ -1,6 +1,5 @@
 package com.huy.newsaggregator.service;
 
-import com.huy.newsaggregator.dto.CreateArticleRequest;
 import com.huy.newsaggregator.dto.CreateResourceRequest;
 import com.huy.newsaggregator.model.Resource;
 import com.huy.newsaggregator.repository.ResourceRepository;
@@ -18,6 +17,10 @@ public class ResourceService {
     }
 
     public Resource createResource(CreateResourceRequest createResourceRequest) {
+        String name = createResourceRequest.getResourceName();
+        Optional<Resource> checkIfExist = resourceRepository.findByResourceName(name);
+        if (checkIfExist.isPresent()) return null;
+
         Resource resource = new Resource();
         resource.setResourceName(createResourceRequest.getResourceName());
         resource.setLink(createResourceRequest.getLink());
