@@ -33,12 +33,6 @@ public class TagController {
         return new ResponseEntity<>(tag, HttpStatus.OK);
     }
 
-//    @GetMapping("/trending")
-//    public ResponseEntity<List<Tag>> trendingTag() {
-//        List<Tag> trendingTags = tagService.getTrendingTags();
-//        return new ResponseEntity<>(trendingTags, HttpStatus.OK);
-//    }
-
     @GetMapping("/trending")
     public ResponseEntity<List<Tag>> trendingTagByDate(
             @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate start,

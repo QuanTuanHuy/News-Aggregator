@@ -8,9 +8,9 @@ import com.huy.newsaggregator.repository.ArticleRepository;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.huy.newsaggregator.repository.TagRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -64,11 +64,20 @@ public class ArticleService {
         return articleRepository.findAll();
     }
 
-    public List<Article> getArticleByResource(
+    public Map<String, Object> getArticleByResource(
         String resource, Integer pageNumber, Integer pageSize, String sortBy, String direction) throws Exception {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
         Resource resource1 = resourceService.getResourceByName(resource);
-        return articleRepository.findArticleByResourceId(resource1.getId(), pageable);
+
+        Page<Article> pageArticles = articleRepository.findArticleByResourceId(resource1.getId(), pageable);
+
+        Map<String, Object> articlesResponse = new HashMap<>();
+        articlesResponse.put("articles", pageArticles.getContent());
+        articlesResponse.put("currentPage", pageArticles.getNumber());
+        articlesResponse.put("totalItems", pageArticles.getTotalElements());
+        articlesResponse.put("totalPages", pageArticles.getTotalPages());
+
+        return articlesResponse;
     }
 
     public List<Article> getArticleByKeyWord(
@@ -100,11 +109,20 @@ public class ArticleService {
         return PageRequest.of(pageNumber, pageSize, sort);
     }
 
-    public List<Article> getArticleByTag(String tag, Integer pageNumber, Integer pageSize, String sortBy,
-                                         String direction) throws Exception {
+    public Map<String, Object> getArticleByTag(String tag, Integer pageNumber, Integer pageSize, String sortBy,
+                                               String direction) throws Exception {
         Tag temp = tagService.getTagByName(tag);
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
-        return articleRepository.findArticleByHashtagsId(temp.getId(), pageable);
+
+        Page<Article> pageArticles = articleRepository.findArticleByHashtagsId(temp.getId(), pageable);
+
+        Map<String, Object> articlesResponse = new HashMap<>();
+        articlesResponse.put("articles", pageArticles.getContent());
+        articlesResponse.put("currentPage", pageArticles.getNumber());
+        articlesResponse.put("totalItems", pageArticles.getTotalElements());
+        articlesResponse.put("totalPages", pageArticles.getTotalPages());
+
+        return articlesResponse;
     }
 
     public List<Article> findSuggestArticles(Long sourceArticleId) throws Exception {
@@ -139,7 +157,7 @@ public class ArticleService {
         articleRepository.deleteAll();
     }
 
-    public List<Article> findArticleBySearchForm(
+    public Map<String, Object> findArticleBySearchForm(
             String resource,
             String type,
             String keyWord,
@@ -211,6 +229,14 @@ public class ArticleService {
 
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
 
-        return articleRepository.findAllByIdsIn(searchId, pageable);
+        Page<Article> pageArticles = articleRepository.findAllByIdsIn(searchId, pageable);
+
+        Map<String, Object> articlesResponse = new HashMap<>();
+        articlesResponse.put("articles", pageArticles.getContent());
+        articlesResponse.put("currentPage", pageArticles.getNumber());
+        articlesResponse.put("totalItems", pageArticles.getTotalElements());
+        articlesResponse.put("totalPages", pageArticles.getTotalPages());
+
+        return articlesResponse;
     }
 }

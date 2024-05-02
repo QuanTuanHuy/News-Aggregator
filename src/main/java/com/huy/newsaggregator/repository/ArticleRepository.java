@@ -2,6 +2,7 @@ package com.huy.newsaggregator.repository;
 
 import com.huy.newsaggregator.model.Article;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,9 +26,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
 
     List<Article> findByCreationDateBetween(LocalDate startDate, LocalDate endDate, Pageable pageable);
 
-    List<Article> findArticleByHashtagsId(Long tagId, Pageable pageable);
+    Page<Article> findArticleByHashtagsId(Long tagId, Pageable pageable);
 
-    List<Article> findArticleByResourceId(Long resourceId, Pageable pageable);
+    Page<Article> findArticleByResourceId(Long resourceId, Pageable pageable);
 
     @Query("SELECT a.id FROM Article a JOIN a.hashtags t WHERE t.id IN :tagIds " +
             "GROUP BY a.id order by COUNT(a.id) DESC LIMIT 6")
@@ -57,5 +58,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
     HashSet<Long> findArticleByHashtagsId(@Param("tagId") Long tagId);
 
     @Query("SELECT a FROM Article a WHERE a.id IN :searchId ORDER BY a.id")
-    List<Article> findAllByIdsIn(@Param("searchId") List<Long> searchId, Pageable pageable);
+    Page<Article> findAllByIdsIn(@Param("searchId") List<Long> searchId, Pageable pageable);
 }

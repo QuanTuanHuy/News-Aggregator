@@ -13,10 +13,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findByName(String tagName);
     List<Tag> findTagByArticlesId(Long ArticleId);
 
-//    @Query("SELECT t.id FROM Tag t JOIN t.articles a GROUP BY t.id ORDER BY COUNT(t.id) DESC")
-//    List<Long> findTrendingTagIds();
-
     @Query("SELECT t.id FROM Tag t JOIN t.articles a WHERE a.creationDate >= :start AND a.creationDate <= :end" +
             " GROUP BY t.id ORDER BY COUNT(t.id) DESC")
-    List<Long> findTrendingTagIdsByDate(@Param("start") LocalDate start,@Param("end") LocalDate end);
+    List<Long> findTrendingTagIdsByDate(@Param("start") LocalDate start, @Param("end") LocalDate end);
 }

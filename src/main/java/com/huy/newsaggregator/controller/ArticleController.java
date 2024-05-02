@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -45,7 +46,7 @@ public class ArticleController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Article>> searchArticle(
+    public ResponseEntity<Map<String, Object>> searchArticle(
             @RequestParam(required = false, defaultValue = "") String resource,
             @RequestParam(required = false, defaultValue = "") String type,
             @RequestParam(required = false, defaultValue = "") String key,
@@ -58,9 +59,9 @@ public class ArticleController {
             @RequestParam(required = false, defaultValue = "desc") String direction
 
     ) throws Exception {
-        List<Article> articles = articleService.findArticleBySearchForm(
+        Map<String, Object> response = articleService.findArticleBySearchForm(
                 resource, type, key, startDate, endDate, tag, sortBy, page, size, direction);
-        return new ResponseEntity<>(articles, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -82,25 +83,25 @@ public class ArticleController {
     }
 
     @GetMapping("/tag")
-    public ResponseEntity<List<Article>> getArticleByTag(
+    public ResponseEntity<Map<String, Object>> getArticleByTag(
             @RequestParam String tag,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "size", required = false, defaultValue = "15") Integer pageSize,
             @RequestParam(name = "sort", required = false, defaultValue = "creationDate") String sortBy,
             @RequestParam(name = "direct", required = false, defaultValue = "DESC") String direction) throws Exception {
-        List<Article> articles = articleService.getArticleByTag(
+        Map<String, Object> articles = articleService.getArticleByTag(
                 tag, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 
     @GetMapping("/resource")
-    public ResponseEntity<List<Article>> getArticleByResource(
+    public ResponseEntity<Map<String, Object>> getArticleByResource(
             @RequestParam String source,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "size", required = false, defaultValue = "15") Integer pageSize,
             @RequestParam(name = "sort", required = false, defaultValue = "creationDate") String sortBy,
             @RequestParam(name = "direct", required = false, defaultValue = "DESC") String direction) throws Exception {
-        List<Article> articles = articleService.getArticleByResource(
+        Map<String, Object> articles = articleService.getArticleByResource(
                 source, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
