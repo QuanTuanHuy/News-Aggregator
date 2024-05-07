@@ -57,6 +57,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
     @Query("SELECT a.id FROM Article a JOIN a.hashtags t WHERE t.id = :tagId")
     HashSet<Long> findArticleByHashtagsId(@Param("tagId") Long tagId);
 
-    @Query("SELECT a FROM Article a WHERE a.id IN :searchId ORDER BY a.id")
+    @Query("SELECT a FROM Article a WHERE a.id IN :searchId")
     Page<Article> findAllByIdsIn(@Param("searchId") List<Long> searchId, Pageable pageable);
 }
