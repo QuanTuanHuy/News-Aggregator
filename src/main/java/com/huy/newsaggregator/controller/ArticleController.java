@@ -2,10 +2,7 @@ package com.huy.newsaggregator.controller;
 
 import com.huy.newsaggregator.dto.CreateArticleRequest;
 import com.huy.newsaggregator.model.Article;
-import com.huy.newsaggregator.model.Tag;
-import com.huy.newsaggregator.service.ArticleService;
-import com.huy.newsaggregator.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.huy.newsaggregator.service.Imp.ArticleService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -96,13 +93,13 @@ public class ArticleController {
 
     @GetMapping("/resource")
     public ResponseEntity<Map<String, Object>> getArticleByResource(
-            @RequestParam String source,
+            @RequestParam String resource,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "size", required = false, defaultValue = "15") Integer pageSize,
             @RequestParam(name = "sort", required = false, defaultValue = "creationDate") String sortBy,
             @RequestParam(name = "direct", required = false, defaultValue = "DESC") String direction) throws Exception {
         Map<String, Object> articles = articleService.getArticleByResource(
-                source, pageNumber, pageSize, sortBy, direction);
+                resource, pageNumber, pageSize, sortBy, direction);
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 

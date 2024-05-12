@@ -1,21 +1,23 @@
-package com.huy.newsaggregator.service;
+package com.huy.newsaggregator.service.Imp;
 
 import com.huy.newsaggregator.dto.CreateResourceRequest;
 import com.huy.newsaggregator.model.Resource;
 import com.huy.newsaggregator.repository.ResourceRepository;
+import com.huy.newsaggregator.service.IResourceService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ResourceService {
+public class ResourceService implements IResourceService {
     private final ResourceRepository resourceRepository;
 
     ResourceService(ResourceRepository resourceRepository) {
         this.resourceRepository = resourceRepository;
     }
 
+    @Override
     public Resource createResource(CreateResourceRequest createResourceRequest) {
         String name = createResourceRequest.getResourceName();
         Optional<Resource> checkIfExist = resourceRepository.findByResourceName(name);
@@ -27,10 +29,12 @@ public class ResourceService {
         return resourceRepository.save(resource);
     }
 
+    @Override
     public List<Resource> getAllResource() {
         return resourceRepository.findAll().stream().toList();
     }
 
+    @Override
     public Resource getResourceById(Long id) throws Exception {
         Optional<Resource> resource =  resourceRepository.findById(id);
         if (resource.isEmpty()) {
@@ -39,6 +43,7 @@ public class ResourceService {
         return resource.get();
     }
 
+    @Override
     public Resource getResourceByName(String websiteResource) throws Exception {
         Optional<Resource> resource = resourceRepository.findByResourceName(websiteResource);
         if (resource.isEmpty()) {

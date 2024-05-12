@@ -1,4 +1,4 @@
-package com.huy.newsaggregator.service;
+package com.huy.newsaggregator.service.Imp;
 
 import com.huy.newsaggregator.dto.CreateArticleRequest;
 import com.huy.newsaggregator.model.Article;
@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.huy.newsaggregator.repository.TagRepository;
+import com.huy.newsaggregator.service.IArticleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,22 +18,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ArticleService {
+public class ArticleService implements IArticleService {
     private final ArticleRepository articleRepository;
 
     private final TagService tagService;
-
-    private final TagRepository tagRepository;
 
     private final ResourceService resourceService;
 
     public ArticleService(ArticleRepository articleRepository, TagService tagService, TagRepository tagRepository, ResourceService resourceService) {
         this.articleRepository = articleRepository;
         this.tagService = tagService;
-        this.tagRepository = tagRepository;
         this.resourceService = resourceService;
     }
 
+    @Override
     public Article createArticle(CreateArticleRequest req) throws Exception {
         Article article = new Article();
         article.setArticleLink(req.getArticleLink());
@@ -52,6 +51,7 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
+    @Override
     public List<Article> createListArticle(List<CreateArticleRequest> reqs) throws Exception {
         List<Article> articles = new ArrayList<>();
         for (var req : reqs) {
@@ -60,10 +60,12 @@ public class ArticleService {
         return articles;
     }
 
+    @Override
     public List<Article> getAllArticle() {
         return articleRepository.findAll();
     }
 
+    @Override
     public Map<String, Object> getArticleByResource(
         String resource, Integer pageNumber, Integer pageSize, String sortBy, String direction) throws Exception {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
@@ -80,18 +82,21 @@ public class ArticleService {
         return articlesResponse;
     }
 
+    @Override
     public List<Article> getArticleByKeyWord(
             String keyWord, Integer pageNumber, Integer pageSize, String sortBy, String direction) {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
         return articleRepository.findByKeyWord(keyWord, pageable);
     }
 
+    @Override
     public List<Article> getArticleByType(
             String type, Integer pageNumber, Integer pageSize, String sortBy, String direction) {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
         return articleRepository.findByArticleType(type, pageable);
     }
 
+    @Override
     public List<Article> getArticleByDate(
             LocalDate startDate, LocalDate endDate,
             int pageNumber, int pageSize, String direction) {
@@ -109,6 +114,7 @@ public class ArticleService {
         return PageRequest.of(pageNumber, pageSize, sort);
     }
 
+    @Override
     public Map<String, Object> getArticleByTag(String tag, Integer pageNumber, Integer pageSize, String sortBy,
                                                String direction) throws Exception {
         Tag temp = tagService.getTagByName(tag);
@@ -125,6 +131,7 @@ public class ArticleService {
         return articlesResponse;
     }
 
+    @Override
     public List<Article> findSuggestArticles(Long sourceArticleId) throws Exception {
         Optional<Article> sourceArticle = articleRepository.findById(sourceArticleId);
         if (sourceArticle.isEmpty()) {
@@ -144,6 +151,7 @@ public class ArticleService {
         return similarArticles;
     }
 
+    @Override
     public Article getArticleById(Long id) throws Exception {
         Optional<Article> article = articleRepository.findById(id);
         if (article.isEmpty()) {
@@ -153,10 +161,12 @@ public class ArticleService {
         }
     }
 
+    @Override
     public void deleteAll() {
         articleRepository.deleteAll();
     }
 
+    @Override
     public Map<String, Object> findArticleBySearchForm(
             String resource,
             String type,

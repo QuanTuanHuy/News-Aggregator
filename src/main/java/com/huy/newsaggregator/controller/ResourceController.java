@@ -2,7 +2,7 @@ package com.huy.newsaggregator.controller;
 
 import com.huy.newsaggregator.dto.CreateResourceRequest;
 import com.huy.newsaggregator.model.Resource;
-import com.huy.newsaggregator.service.ResourceService;
+import com.huy.newsaggregator.service.Imp.ResourceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
