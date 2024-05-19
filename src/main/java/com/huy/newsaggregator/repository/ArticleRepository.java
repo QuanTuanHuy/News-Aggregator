@@ -25,6 +25,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
             "OR lower(a.articleSummary) LIKE lower(concat('%', :keyWord, '%'))")
     List<Article> findByKeyWord(String keyWord, Pageable pageable);
 
+    @Query(value = "SELECT *, " +
+            "(MATCH(article_title) AGAINST(:keywords IN BOOLEAN MODE) * 2 + " +
+            "MATCH(detailed_article_content) AGAINST(:keywords IN BOOLEAN MODE)) AS weighted_score " +
+            "FROM articles " +
+            "WHERE MATCH(article_title, detailed_article_content) AGAINST(:keywords IN BOOLEAN MODE) " +
+            "ORDER BY weighted_score DESC",
+            nativeQuery = true)
+    List<Article> findByKeyWordWithRank(@Param("keywords") String keywords, Pageable pageable);
+
     List<Article> findByCreationDateBetween(LocalDate startDate, LocalDate endDate, Pageable pageable);
 
     Page<Article> findArticleByHashtagsId(Long tagId, Pageable pageable);
@@ -50,6 +59,17 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
             "OR lower(a.detailedArticleContent) LIKE lower(concat('%', :keyWord, '%')) " +
             "OR lower(a.articleSummary) LIKE lower(concat('%', :keyWord, '%'))")
     HashSet<Long> findByKeyWord(@Param("keyWord") String keyWord);
+
+    @Query(value = "SELECT *, " +
+            "(MATCH(article_title) AGAINST(:keywords IN BOOLEAN MODE) * 2 + " +
+            "MATCH(detailed_article_content) AGAINST(:keywords IN BOOLEAN MODE)) AS weighted_score " +
+            "FROM articles " +
+            "WHERE MATCH(article_title, detailed_article_content) AGAINST(:keywords IN BOOLEAN MODE) " +
+            "AND id IN :searchId " +
+            "ORDER BY weighted_score DESC",
+            nativeQuery = true)
+    Page<Article> findByKeyWordWithRankAndInListId(@Param("keywords") String keywords, @Param("searchId") List<Long> searchId,
+                                       Pageable pageable);
 
     @Query("SELECT a.id FROM Article a WHERE a.creationDate >= :startDate AND a.creationDate <= :endDate")
     HashSet<Long> findByCreationDateBetween(@Param("startDate") LocalDate startDate,

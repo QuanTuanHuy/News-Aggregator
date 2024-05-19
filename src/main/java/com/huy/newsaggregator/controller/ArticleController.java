@@ -51,13 +51,10 @@ public class ArticleController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate endDate,
             @RequestParam(required = false, defaultValue = "") String tag,
             @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "15") Integer size,
-            @RequestParam(required = false, defaultValue = "creationDate") String sortBy,
-            @RequestParam(required = false, defaultValue = "desc") String direction
-
+            @RequestParam(required = false, defaultValue = "15") Integer size
     ) throws Exception {
         Map<String, Object> response = articleService.findArticleBySearchForm(
-                resource, type, key, startDate, endDate, tag, sortBy, page, size, direction);
+                resource, type, key, startDate, endDate, tag, page, size);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -71,11 +68,9 @@ public class ArticleController {
     public ResponseEntity<List<Article>> getArticleByKeyWord(
             @RequestParam(value = "key") String keyWord,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer pageNumber,
-            @RequestParam(name = "size", required = false, defaultValue = "15") Integer pageSize,
-            @RequestParam(name = "sort", required = false, defaultValue = "creationDate") String sortBy,
-            @RequestParam(name = "direct", required = false, defaultValue = "DESC") String direction) {
+            @RequestParam(name = "size", required = false, defaultValue = "15") Integer pageSize) {
         List<Article> articles = articleService.getArticleByKeyWord(
-                keyWord, pageNumber, pageSize, sortBy, direction);
+                keyWord, pageNumber, pageSize);
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 

@@ -14,7 +14,7 @@ public interface IArticleService {
     Map<String, Object> getArticleByResource(
             String resource, Integer pageNumber, Integer pageSize, String sortBy, String direction) throws Exception;
     List<Article> getArticleByKeyWord(
-            String keyWord, Integer pageNumber, Integer pageSize, String sortBy, String direction);
+            String keyWord, Integer pageNumber, Integer pageSize);
     List<Article> getArticleByType(
             String type, Integer pageNumber, Integer pageSize, String sortBy, String direction);
     List<Article> getArticleByDate(
@@ -32,9 +32,7 @@ public interface IArticleService {
             LocalDate startDate,
             LocalDate endDate,
             String tagName,
-            String sortBy,
             Integer pageNumber,
-            Integer pageSize,
-            String direction) throws Exception;
+            Integer pageSize) throws Exception;
 
 }

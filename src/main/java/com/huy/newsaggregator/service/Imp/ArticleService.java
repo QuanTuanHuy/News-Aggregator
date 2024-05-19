@@ -84,9 +84,21 @@ public class ArticleService implements IArticleService {
 
     @Override
     public List<Article> getArticleByKeyWord(
-            String keyWord, Integer pageNumber, Integer pageSize, String sortBy, String direction) {
-        Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
-        return articleRepository.findByKeyWord(keyWord, pageable);
+            String keyWord, Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        String searchKey = convertKeyWordSearch(keyWord);
+        return articleRepository.findByKeyWordWithRank(searchKey, pageable);
+    }
+
+    private String convertKeyWordSearch(String keyWord) {
+        String[] arrKeys = keyWord.split(",");
+        StringBuilder keyword = new StringBuilder();
+        for (String s : arrKeys) {
+            keyword.append("+");
+            keyword.append(s);
+            keyword.append(" ");
+        }
+        return keyword.toString();
     }
 
     @Override
@@ -174,10 +186,8 @@ public class ArticleService implements IArticleService {
             LocalDate startDate,
             LocalDate endDate,
             String tagName,
-            String sortBy,
             Integer pageNumber,
-            Integer pageSize,
-            String direction) throws Exception {
+            Integer pageSize) throws Exception {
         List<Long> articlesId = articleRepository.findAllArticleId();
         List<Long> searchId = new ArrayList<>();
         List<Article> searchArticle = new ArrayList<>();
@@ -197,14 +207,6 @@ public class ArticleService implements IArticleService {
             temp = articleRepository.findByArticleType(type);
             if (temp.isEmpty()) {
                 throw new Exception("No found article with type is " + type);
-            }
-            search.add(temp);
-        }
-
-        if (!keyWord.isEmpty()) {
-            temp = articleRepository.findByKeyWord(keyWord);
-            if (temp.isEmpty()) {
-                throw new Exception("No found article contain keyword " + keyWord);
             }
             search.add(temp);
         }
@@ -237,9 +239,15 @@ public class ArticleService implements IArticleService {
             if (flag) searchId.add(id);
         }
 
-        Pageable pageable = createPageable(pageNumber, pageSize, sortBy, direction);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Article> pageArticles = null;
 
-        Page<Article> pageArticles = articleRepository.findAllByIdsIn(searchId, pageable);
+        if (!keyWord.isEmpty()) {
+            String searchKey = convertKeyWordSearch(keyWord);
+            pageArticles = articleRepository.findByKeyWordWithRankAndInListId(searchKey, searchId, pageable);
+        } else {
+            pageArticles = articleRepository.findAllByIdsIn(searchId, pageable);
+        }
 
         Map<String, Object> articlesResponse = new HashMap<>();
         articlesResponse.put("articles", pageArticles.getContent());
