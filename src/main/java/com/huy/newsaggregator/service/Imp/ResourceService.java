@@ -1,6 +1,7 @@
 package com.huy.newsaggregator.service.Imp;
 
 import com.huy.newsaggregator.dto.CreateResourceRequest;
+import com.huy.newsaggregator.exception.ResourceNotFoundException;
 import com.huy.newsaggregator.model.Resource;
 import com.huy.newsaggregator.repository.ResourceRepository;
 import com.huy.newsaggregator.service.IResourceService;
@@ -44,10 +45,10 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public Resource getResourceByName(String websiteResource) throws Exception {
+    public Resource getResourceByName(String websiteResource) throws ResourceNotFoundException {
         Optional<Resource> resource = resourceRepository.findByResourceName(websiteResource);
         if (resource.isEmpty()) {
-            throw new Exception("Resource name does not exist");
+            throw new ResourceNotFoundException("Resource", "name", websiteResource);
         }
         return resource.get();
     }

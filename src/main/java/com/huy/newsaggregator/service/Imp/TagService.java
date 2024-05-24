@@ -1,5 +1,6 @@
 package com.huy.newsaggregator.service.Imp;
 
+import com.huy.newsaggregator.exception.ResourceNotFoundException;
 import com.huy.newsaggregator.model.Tag;
 import com.huy.newsaggregator.repository.TagRepository;
 import com.huy.newsaggregator.service.ITagService;
@@ -58,16 +59,16 @@ public class TagService implements ITagService {
     public Tag findTagById(Long id) throws Exception {
         Optional<Tag> tag = tagRepository.findById(id);
         if (tag.isEmpty()) {
-            throw new Exception("tag id does not exist ...");
+            throw new ResourceNotFoundException("Tag", "ID", id);
         }
         return tag.get();
     }
 
     @Override
-    public Tag getTagByName(String name) throws Exception {
+    public Tag getTagByName(String name) throws ResourceNotFoundException {
         Optional<Tag> temp = tagRepository.findByName(name);
         if (temp.isEmpty()) {
-            throw new Exception("Tag does not exist ...");
+            throw new ResourceNotFoundException("Tag", "name", name);
         }
         return temp.get();
     }

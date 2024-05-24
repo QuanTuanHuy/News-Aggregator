@@ -68,8 +68,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long>{
             "AND id IN :searchId " +
             "ORDER BY weighted_score DESC",
             nativeQuery = true)
-    Page<Article> findByKeyWordWithRankAndInListId(@Param("keywords") String keywords, @Param("searchId") List<Long> searchId,
-                                       Pageable pageable);
+    Page<Article> findByKeyWordWithRankAndInListId(@Param("keywords") String keywords,
+                                                   @Param("searchId") List<Long> searchId,
+                                                   Pageable pageable);
 
     @Query("SELECT a.id FROM Article a WHERE a.creationDate >= :startDate AND a.creationDate <= :endDate")
     HashSet<Long> findByCreationDateBetween(@Param("startDate") LocalDate startDate,

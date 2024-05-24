@@ -22,7 +22,7 @@ public class Article {
     @Column(length = 2000)
     private String articleSummary;
     private String articleTitle;
-    @Column(length = 13000)
+    @Column(length = 15000)
     private String detailedArticleContent;
     private LocalDate creationDate;
 

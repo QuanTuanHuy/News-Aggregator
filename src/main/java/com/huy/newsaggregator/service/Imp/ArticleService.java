@@ -1,6 +1,7 @@
 package com.huy.newsaggregator.service.Imp;
 
 import com.huy.newsaggregator.dto.CreateArticleRequest;
+import com.huy.newsaggregator.exception.ResourceNotFoundException;
 import com.huy.newsaggregator.model.Article;
 import com.huy.newsaggregator.model.Resource;
 import com.huy.newsaggregator.model.Tag;
@@ -25,7 +26,7 @@ public class ArticleService implements IArticleService {
 
     private final ResourceService resourceService;
 
-    public ArticleService(ArticleRepository articleRepository, TagService tagService, TagRepository tagRepository, ResourceService resourceService) {
+    public ArticleService(ArticleRepository articleRepository, TagService tagService, ResourceService resourceService) {
         this.articleRepository = articleRepository;
         this.tagService = tagService;
         this.resourceService = resourceService;
@@ -48,7 +49,11 @@ public class ArticleService implements IArticleService {
         Set<Tag> createTags = tagService.createTags(req.getHashtags());
         article.setHashtags(createTags);
 
-        return articleRepository.save(article);
+        try {
+            return articleRepository.save(article);
+        } catch (Exception e) {
+            throw new Exception("Something went wrong");
+        }
     }
 
     @Override
@@ -73,13 +78,7 @@ public class ArticleService implements IArticleService {
 
         Page<Article> pageArticles = articleRepository.findArticleByResourceId(resource1.getId(), pageable);
 
-        Map<String, Object> articlesResponse = new HashMap<>();
-        articlesResponse.put("articles", pageArticles.getContent());
-        articlesResponse.put("currentPage", pageArticles.getNumber());
-        articlesResponse.put("totalItems", pageArticles.getTotalElements());
-        articlesResponse.put("totalPages", pageArticles.getTotalPages());
-
-        return articlesResponse;
+        return toPageArticleResponse(pageArticles);
     }
 
     @Override
@@ -90,16 +89,6 @@ public class ArticleService implements IArticleService {
         return articleRepository.findByKeyWordWithRank(searchKey, pageable);
     }
 
-    private String convertKeyWordSearch(String keyWord) {
-        String[] arrKeys = keyWord.split(",");
-        StringBuilder keyword = new StringBuilder();
-        for (String s : arrKeys) {
-            keyword.append("+");
-            keyword.append(s);
-            keyword.append(" ");
-        }
-        return keyword.toString();
-    }
 
     @Override
     public List<Article> getArticleByType(
@@ -134,13 +123,7 @@ public class ArticleService implements IArticleService {
 
         Page<Article> pageArticles = articleRepository.findArticleByHashtagsId(temp.getId(), pageable);
 
-        Map<String, Object> articlesResponse = new HashMap<>();
-        articlesResponse.put("articles", pageArticles.getContent());
-        articlesResponse.put("currentPage", pageArticles.getNumber());
-        articlesResponse.put("totalItems", pageArticles.getTotalElements());
-        articlesResponse.put("totalPages", pageArticles.getTotalPages());
-
-        return articlesResponse;
+        return toPageArticleResponse(pageArticles);
     }
 
     @Override
@@ -173,10 +156,6 @@ public class ArticleService implements IArticleService {
         }
     }
 
-    @Override
-    public void deleteAll() {
-        articleRepository.deleteAll();
-    }
 
     @Override
     public Map<String, Object> findArticleBySearchForm(
@@ -187,10 +166,9 @@ public class ArticleService implements IArticleService {
             LocalDate endDate,
             String tagName,
             Integer pageNumber,
-            Integer pageSize) throws Exception {
+            Integer pageSize) throws ResourceNotFoundException {
         List<Long> articlesId = articleRepository.findAllArticleId();
         List<Long> searchId = new ArrayList<>();
-        List<Article> searchArticle = new ArrayList<>();
         List<HashSet<Long>> search = new ArrayList<>();
         HashSet<Long> temp;
 
@@ -198,7 +176,7 @@ public class ArticleService implements IArticleService {
             Resource resource1 = resourceService.getResourceByName(resource);
             temp = articleRepository.findArticleByResourceId(resource1.getId());
             if (temp.isEmpty()) {
-                throw new Exception("No found article with resource is" + resource);
+                throw new ResourceNotFoundException("Article", "resource", resource);
             }
             search.add(temp);
         }
@@ -206,7 +184,7 @@ public class ArticleService implements IArticleService {
         if (!type.isEmpty()) {
             temp = articleRepository.findByArticleType(type);
             if (temp.isEmpty()) {
-                throw new Exception("No found article with type is " + type);
+                throw new ResourceNotFoundException("Article", "type", type);
             }
             search.add(temp);
         }
@@ -214,7 +192,7 @@ public class ArticleService implements IArticleService {
         if (startDate != null && endDate != null) {
             temp = articleRepository.findByCreationDateBetween(startDate, endDate);
             if (temp.isEmpty()) {
-                throw new Exception("No found article between " + startDate + " and " + endDate);
+                throw new ResourceNotFoundException("Article", "creationDate", startDate, endDate);
             }
             search.add(temp);
         }
@@ -223,7 +201,7 @@ public class ArticleService implements IArticleService {
             Tag tag = tagService.getTagByName(tagName);
             temp = articleRepository.findArticleByHashtagsId(tag.getId());
             if (temp.isEmpty()) {
-                throw new Exception("No found article contain tag is " + tagName);
+                throw new ResourceNotFoundException("Article", "tag", tagName);
             }
             search.add(temp);
         }
@@ -249,6 +227,10 @@ public class ArticleService implements IArticleService {
             pageArticles = articleRepository.findAllByIdsIn(searchId, pageable);
         }
 
+        return toPageArticleResponse(pageArticles);
+    }
+
+    public Map<String, Object> toPageArticleResponse(Page<Article> pageArticles) {
         Map<String, Object> articlesResponse = new HashMap<>();
         articlesResponse.put("articles", pageArticles.getContent());
         articlesResponse.put("currentPage", pageArticles.getNumber());
@@ -256,5 +238,21 @@ public class ArticleService implements IArticleService {
         articlesResponse.put("totalPages", pageArticles.getTotalPages());
 
         return articlesResponse;
+    }
+
+    @Override
+    public void deleteAll() {
+        articleRepository.deleteAll();
+    }
+
+    private String convertKeyWordSearch(String keyWord) {
+        String[] arrKeys = keyWord.split(",");
+        StringBuilder keyword = new StringBuilder();
+        for (String s : arrKeys) {
+            keyword.append("+");
+            keyword.append(s);
+            keyword.append(" ");
+        }
+        return keyword.toString();
     }
 }

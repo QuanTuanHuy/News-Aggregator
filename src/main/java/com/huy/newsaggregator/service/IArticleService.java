@@ -1,6 +1,7 @@
 package com.huy.newsaggregator.service;
 
 import com.huy.newsaggregator.dto.CreateArticleRequest;
+import com.huy.newsaggregator.exception.ResourceNotFoundException;
 import com.huy.newsaggregator.model.Article;
 
 import java.time.LocalDate;
